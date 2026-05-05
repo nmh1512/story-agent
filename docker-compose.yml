@@ -1,0 +1,106 @@
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: story_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DB:-story_agent}
+      MYSQL_USER: ${MYSQL_USER:-story}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-story}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  redis:
+    image: redis:alpine
+    container_name: story_redis
+    restart: always
+    ports:
+      - "6378:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  falkordb:
+    image: falkordb/falkordb:latest
+    container_name: story_falkordb
+    restart: always
+    ports:
+      - "6380:6379"  # mapped to 6380 to avoid collision if local redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: story_ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  app:
+    build: .
+    container_name: story_app
+    env_file: .env
+    volumes:
+      - .:/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      falkordb:
+        condition: service_healthy
+    # Keep container alive for manual CLI usage
+    command: tail -f /dev/null
+
+  worker:
+    build: .
+    container_name: story_worker
+    env_file: .env
+    volumes:
+      - .:/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: python -m app.cli worker
+
+  scheduler:
+    build: .
+    container_name: story_scheduler
+    env_file: .env
+    volumes:
+      - .:/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: python -m app.cli scheduler-start
+
+volumes:
+  mysql_data:
+  ollama_data:

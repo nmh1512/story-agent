@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+logs/
+mysql_data/
+redis_data/
+ollama_data/
+falkordb_data/
+.vscode/
+.idea/
