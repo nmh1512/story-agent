@@ -25,7 +25,16 @@ class MemoryUpdateAgent:
             inp.chapter_no,
         )
         prompt = build_memory_prompt(inp)
-        raw = self.llm.generate_json(prompt, system=SYSTEM)
+        raw = self.llm.generate_json(
+            prompt,
+            system=SYSTEM,
+            options={
+                "max_tokens": 2048,
+                "temperature": 0.4,
+                "format": "json",
+            }
+        )
+
 
         if not raw:
             raise ValueError("MemoryUpdateAgent received empty response from LLM")

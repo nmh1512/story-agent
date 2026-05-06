@@ -30,9 +30,9 @@ class WriterAgent:
             prompt, 
             system=SYSTEM,
             options={
-                "num_ctx": 4096,
-                "num_predict": 2000,
+                "max_tokens": 4096,
                 "temperature": 0.6,
+                "format": "json",
             }
         )
 

@@ -37,11 +37,14 @@ class Settings(BaseSettings):
     FALKORDB_PORT: int = 6379
     FALKORDB_GRAPH: str = "story_graph"
 
-    # ── LLM ───────────────────────────────────────────────────
-    LLM_PROVIDER: str = "ollama"               # "ollama" | "openai_compatible"
-    LLM_BASE_URL: str = "http://ollama:11434"  # Ollama default
+    # ── LLM ───────────────────────────────────────────────
+    # Provider: "ollama" | "openai_compatible" | "gemini" | "openai"
+    LLM_PROVIDER: str = "ollama"
+    LLM_BASE_URL: str = "http://ollama:11434"  # Ollama / OpenAI-compat base URL
     LLM_MODEL: str = "llama3:8b"
     LLM_TIMEOUT: int = 600
+    LLM_API_KEY_GEMINI: str = ""   # Google AI Studio API key
+    LLM_API_KEY_OPENAI: str = ""   # OpenAI API key
     LLM_MAX_RETRIES: int = 3
 
     # ── Logging ────────────────────────────────────────────────

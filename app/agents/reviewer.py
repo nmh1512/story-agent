@@ -29,10 +29,9 @@ class ReviewerAgent:
             prompt, 
             system=SYSTEM,
             options={
-                "num_ctx": 2048,
-                "num_predict": 500,
+                "max_tokens": 1024,
                 "temperature": 0.5,
-                "format": "json"
+                "format": "json",
             }
         )
 

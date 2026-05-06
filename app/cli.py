@@ -69,29 +69,14 @@ def new_story():
         session.commit()
         typer.secho(f"New story created: {story.title} (ID: {story.id})", fg=typer.colors.GREEN)
         typer.secho(f"Premise: {story.premise}", italic=True)
-    return story.id
+        return story.id
 
 
-@app.command("plan-daily")
-def plan_daily(story_id: int = typer.Option(None, help="Specific story ID to plan for")):
-    """Conceive a NEW story or plan the next chapter for an existing one."""
-    target_date = date.today().isoformat()
-    with get_session() as session:
-        svc = StoryService(session)
-        if story_id is None:
-            typer.echo("No story ID provided. Conceiving a brand new story idea...")
-            story = svc.initiate_new_story(target_date)
-            session.commit()
-            typer.secho(f"New story created: {story.title} (ID: {story.id})", fg=typer.colors.GREEN)
-        else:
-            story = session.get(Story, story_id)
-            if not story:
-                typer.secho(f"Story {story_id} not found.", fg=typer.colors.RED)
-                return
-            typer.echo(f"Planning next chapter for Story {story.id} ({story.title})...")
-            svc.plan_daily_for_story(story.id, target_date)
-            session.commit()
-    typer.secho("Planning phase complete.", fg=typer.colors.GREEN)
+
+@app.command("plan-due")
+def plan_due():
+    """Find due plan tasks and run Planner agent."""
+    _run_tasks(TaskType.plan, "plan_chapter")
 
 
 def _run_tasks(task_type: TaskType, handler_method: str):
@@ -159,10 +144,12 @@ def sync_graph():
     typer.echo("Graph sync complete.")
 
 
+from typing import Optional
+
 @app.command("run-once")
-def run_once(story_id: int = typer.Option(None)):
+def run_once(story_id: int = typer.Option(0, help="Story ID to run for (if 0, creates new)")):
     """Always start a NEW story and run the full pipeline: genesis -> write -> review -> memory."""
-    if story_id is None:
+    if story_id == 0:
         typer.echo("Starting a fresh story session...")
         with get_session() as session:
             svc = StoryService(session)
@@ -171,6 +158,7 @@ def run_once(story_id: int = typer.Option(None)):
             story_id = story.id
             typer.secho(f"Genesis Complete: {story.title}", fg=typer.colors.CYAN)
 
+    plan_due()
     write_due()
     review_due()
     rewrite_due()

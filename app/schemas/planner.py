@@ -28,7 +28,13 @@ class ChapterPlan(BaseModel):
     key_events: list[str] = Field(default_factory=list)
 
 
+class ActPlan(BaseModel):
+    title: str
+    summary: str
+
 class PlannerOutput(BaseModel):
+    recent_events_analysis: str | None = Field(None, description="Tóm tắt ngắn gọn chương liền trước để nhận thức rõ nhân vật vừa làm gì.")
+    new_direction_decision: str | None = Field(None, description="Cam kết bẻ lái sang một tình huống HOÀN TOÀN KHÁC để không bị lặp lại ý tưởng của chương trước.")
     # Story Genesis fields (optional, used when creating a new story)
     title: str | None = None
     genre: str | None = None
@@ -40,13 +46,16 @@ class PlannerOutput(BaseModel):
     
     # Full Series Script (for 10-20 chapters)
     series_plan: list[ChapterPlan] | None = None
+    act_summaries: list[ActPlan] | None = None # Structured summary for Act 1, 2, and 3
 
     # Chapter Planning fields
     story_id: int | None = None # Optional during Genesis
-    chapter_no: int
-    theme: str
-    summary: str
+    # Chapter-specific fields (for the current target chapter)
+    chapter_no: int | None = None
+    theme: str = "Tên chương đang cập nhật"
+    summary: str = "Tóm tắt đang cập nhật"
     outline: dict[str, Any] = Field(
+        default_factory=dict,
         description="Detailed outline including chapter_goal, chapter_purpose, scene_list, ending_hook, and tone."
     )
     must_include: list[str] = Field(default_factory=list)

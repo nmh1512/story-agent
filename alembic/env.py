@@ -8,6 +8,8 @@ from alembic import context
 
 from app.core.config import settings
 from app.db.base import Base
+from app.db.models import * # Load models to populate Base.metadata
+
 
 config = context.config
 

@@ -34,10 +34,12 @@ class PlannerAgent:
             options={
                 "num_ctx": 8192,
                 "num_predict": 4096,
-                "temperature": 0.6,
+                "temperature": 0.8,
                 "format": "json"
             }
         )
+
+
 
         logger.debug("PlannerAgent raw output: %s", raw)
 
@@ -55,6 +57,9 @@ class PlannerAgent:
 
         output = PlannerOutput.model_validate(raw)
         logger.info(
-            "PlannerAgent done chapter_no=%d theme=%s", output.chapter_no, output.theme
+            "PlannerAgent done chapter_no=%s theme=%s", 
+            output.chapter_no or "?", 
+            output.theme
         )
+
         return output
